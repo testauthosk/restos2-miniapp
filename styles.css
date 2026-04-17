@@ -294,24 +294,22 @@ main#app { position: relative; z-index: 2; }
   padding: 2px 2px;
   animation: fade-in 400ms var(--ease-out-smooth) both;
 }
-.screen .back {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--silver);
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  margin-bottom: 24px;
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 8px 0;
-  transition: color 150ms ease;
-  font-family: var(--font);
+.screen-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--green-soft);
+  color: var(--green);
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--green) 22%, transparent);
 }
-.screen .back:hover { color: var(--white); }
+.screen-icon--muted {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
 .screen h2 {
   font-size: 26px;
   font-weight: 700;

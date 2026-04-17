@@ -166,7 +166,6 @@ function renderTTK() {
   setupBackButton(backToHome);
   app.innerHTML = `
     <div class="screen">
-      <button class="back" onclick="backToHome()">← Назад</button>
       <h2>Составить ТТК</h2>
       <div class="desc">Технико-технологическая карта. Заполни поля — бот соберёт документ по стандарту.</div>
 
@@ -213,8 +212,7 @@ function renderSimple(title, iconSvg, desc, scenarioId) {
     setupBackButton(backToHome);
     app.innerHTML = `
       <div class="screen">
-        <button class="back" onclick="backToHome()">← Назад</button>
-        <div style="width:48px;height:48px;border-radius:14px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;margin-bottom:18px;box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--green) 22%, transparent);">${iconSvg.replace('width="20"','width="24"').replace('height="20"','height="24"')}</div>
+        <div class="screen-icon">${iconSvg.replace('width="20"','width="24"').replace('height="20"','height="24"')}</div>
         <h2>${title}</h2>
         <div class="desc">${desc}</div>
       </div>
@@ -228,8 +226,7 @@ function renderStub(title, iconSvg, desc) {
     setupBackButton(backToHome);
     app.innerHTML = `
       <div class="screen">
-        <button class="back" onclick="backToHome()">← Назад</button>
-        <div style="width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,0.04);color:var(--muted);display:grid;place-items:center;margin-bottom:18px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06);">${iconSvg.replace('width="20"','width="24"').replace('height="20"','height="24"')}</div>
+        <div class="screen-icon screen-icon--muted">${iconSvg.replace('width="20"','width="24"').replace('height="20"','height="24"')}</div>
         <h2>${title}</h2>
         <div class="desc">${desc} в разработке. Пока доступны другие инструменты или свободный диалог.</div>
       </div>
