@@ -1,18 +1,46 @@
 const tg = window.Telegram?.WebApp;
-if (tg) { tg.ready(); tg.expand(); tg.enableClosingConfirmation(); }
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.enableClosingConfirmation();
+  tg.disableVerticalSwipes?.();
+  try { tg.setHeaderColor('#121418'); tg.setBackgroundColor('#121418'); } catch {}
+}
+
+const haptic = {
+  tap:    () => tg?.HapticFeedback?.impactOccurred?.('light'),
+  medium: () => tg?.HapticFeedback?.impactOccurred?.('medium'),
+  heavy:  () => tg?.HapticFeedback?.impactOccurred?.('heavy'),
+  sel:    () => tg?.HapticFeedback?.selectionChanged?.(),
+  ok:     () => tg?.HapticFeedback?.notificationOccurred?.('success'),
+  err:    () => tg?.HapticFeedback?.notificationOccurred?.('error'),
+};
 
 const app = document.getElementById('app');
 
+const icons = {
+  chef: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><path d="M6 17h12"/></svg>`,
+  file:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5M8 9h2"/></svg>`,
+  camera: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="4"/></svg>`,
+  utensils:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zM18 22v-7"/></svg>`,
+  coins:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>`,
+  receipt:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>`,
+  chart:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6" rx="1"/><rect x="12" y="8" width="3" height="10" rx="1"/><rect x="17" y="4" width="3" height="14" rx="1"/></svg>`,
+  chat:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/></svg>`,
+  headphones:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>`,
+};
+
 const SCENARIOS = [
-  { id: 'ttk',       icon: '📝', title: 'Составить ТТК' },
-  { id: 'reverse',   icon: '📷', title: 'Реверс блюда по фото' },
-  { id: 'new_menu',  icon: '🍽', title: 'Разработать меню / блюдо' },
-  { id: 'food_cost', icon: '💰', title: 'Снизить food cost' },
-  { id: 'invoice',   icon: '📄', title: 'OCR накладной' },
-  { id: 'abc',       icon: '📊', title: 'ABC-анализ Excel' },
+  { id: 'ttk',       icon: 'file',     title: 'Составить ТТК' },
+  { id: 'reverse',   icon: 'camera',   title: 'Реверс блюда по фото' },
+  { id: 'new_menu',  icon: 'utensils', title: 'Разработать меню / блюдо' },
+  { id: 'food_cost', icon: 'coins',    title: 'Снизить food cost' },
+  { id: 'invoice',   icon: 'receipt',  title: 'OCR накладной', soon: true },
+  { id: 'abc',       icon: 'chart',    title: 'ABC-анализ Excel', soon: true },
 ];
 
 function send(payload) {
+  haptic.heavy();
   if (tg) {
     tg.sendData(JSON.stringify(payload));
     tg.close();
@@ -22,10 +50,23 @@ function send(payload) {
   }
 }
 
+function setupBackButton(handler) {
+  if (!tg?.BackButton) return;
+  tg.BackButton.show();
+  tg.BackButton.offClick();
+  tg.BackButton.onClick(handler);
+}
+
+function hideBackButton() {
+  tg?.BackButton?.hide?.();
+}
+
 function renderHome() {
+  hideBackButton();
+  hideMainButton();
   app.innerHTML = `
     <div class="header">
-      <div class="logo">🍳</div>
+      <div class="logo">${icons.chef}</div>
       <div>
         <h1>РестОС</h1>
         <div class="sub">ИИ-помощник для ресторана</div>
@@ -34,73 +75,79 @@ function renderHome() {
 
     <div class="plan-card">
       <div class="label">Демо-тариф · 0 ₽</div>
-      <div class="value">0 из 10 запросов</div>
+      <div class="value">0 / 10 запросов</div>
       <div class="progress"><div style="width:0%"></div></div>
-      <div class="meta">Лимит сбросится в начале следующего месяца</div>
+      <div class="meta">Лимит обновится 1 мая</div>
     </div>
 
-    <div class="section-title">Меню</div>
+    <div class="section-title">Инструменты</div>
     <div class="grid" id="menu-grid"></div>
 
-    <div class="section-title">Свободный диалог</div>
-    <div class="card wide chat" data-id="chat">
-      <div class="icon">💬</div>
+    <div class="section-title">Свободный режим</div>
+    <div class="card wide chat" data-id="chat" style="--i:6">
+      <div class="icon-tile">${icons.chat}</div>
       <div class="title">Задать свой вопрос<span>любая задача по кухне</span></div>
     </div>
 
-    <div class="support">Техническая поддержка — @restos_support</div>
+    <div class="support">${icons.headphones}<span>Техподдержка — @restos_support</span></div>
   `;
+
   const grid = document.getElementById('menu-grid');
-  SCENARIOS.forEach(s => {
+  SCENARIOS.forEach((s, i) => {
     const el = document.createElement('div');
-    el.className = 'card';
+    el.className = 'card' + (s.soon ? ' soon' : '');
     el.dataset.id = s.id;
-    el.innerHTML = `<div class="icon">${s.icon}</div><div class="title">${s.title}</div>`;
-    el.addEventListener('click', () => openScenario(s.id));
+    el.style.setProperty('--i', i);
+    el.innerHTML = `<div class="icon-tile">${icons[s.icon]}</div><div class="title">${s.title}</div>`;
+    el.addEventListener('click', () => { haptic.tap(); openScenario(s.id); });
     grid.appendChild(el);
   });
-  document.querySelector('.card.chat').addEventListener('click', () => openScenario('chat'));
+
+  const chatCard = document.querySelector('.card.chat');
+  chatCard.addEventListener('click', () => { haptic.tap(); openScenario('chat'); });
 }
 
 function openScenario(id) {
   const routes = {
     ttk: renderTTK,
-    reverse: renderSimple('📷 Реверс блюда по фото', 'Сценарий открывается в чате. Нажми «Открыть», пришли фото.', 'reverse'),
-    new_menu: renderSimple('🍽 Разработать меню / блюдо', 'Запустим анкету из 14 вопросов в чате.', 'new_menu'),
-    food_cost: renderSimple('💰 Снижение food cost', 'Пришли калькуляционную карту (фото/текст) и цель.', 'food_cost'),
-    invoice: renderStub('📄 OCR накладной', 'В разработке'),
-    abc: renderStub('📊 ABC-анализ Excel', 'В разработке'),
-    chat: renderSimple('💬 Свободный диалог', 'Открываем чат — задавай любой вопрос.', 'chat'),
+    reverse: renderSimple('Реверс блюда по фото', icons.camera, 'Открою чат в боте — пришли фото блюда, разложу на компоненты и верну ТТК.', 'reverse'),
+    new_menu: renderSimple('Разработать меню / блюдо', icons.utensils, 'Пройдёшь короткую анкету в чате (14 вопросов), соберу концепцию и блюда.', 'new_menu'),
+    food_cost: renderSimple('Снизить food cost', icons.coins, 'Пришли калькуляционную карту (текст или фото) и целевой food cost — верну план снижения.', 'food_cost'),
+    invoice: renderStub('OCR накладной', icons.receipt, 'Модуль распознавания накладных'),
+    abc: renderStub('ABC-анализ Excel', icons.chart, 'Модуль аналитики продаж'),
+    chat: renderSimple('Свободный диалог', icons.chat, 'Открою чат в боте — задавай любой вопрос по кухне, технологии, управлению.', 'chat'),
   };
   (routes[id] || renderHome)();
 }
 
 function renderTTK() {
+  setupBackButton(renderHome);
   app.innerHTML = `
     <div class="screen">
       <button class="back" onclick="renderHome()">← Назад</button>
       <h2>Составить ТТК</h2>
-      <div class="desc">Технико-технологическая карта блюда. Заполни, отправлю в бота — он выдаст готовый документ.</div>
+      <div class="desc">Технико-технологическая карта. Заполни поля — бот соберёт документ по стандарту.</div>
 
       <div class="field">
         <label>Название блюда</label>
-        <input id="ttk-name" placeholder="Например: Паста карбонара">
+        <input id="ttk-name" placeholder="Паста карбонара">
       </div>
       <div class="field">
-        <label>Ингредиенты с нетто в граммах (по строке на ингредиент)</label>
-        <textarea id="ttk-ingredients" placeholder="Спагетти — 100 г&#10;Бекон — 40 г&#10;Яйцо — 1 шт (50 г)&#10;Сыр пармезан — 20 г"></textarea>
+        <label>Ингредиенты, нетто в граммах</label>
+        <textarea id="ttk-ingredients" placeholder="Спагетти — 100 г&#10;Бекон — 40 г&#10;Яйцо — 1 шт (50 г)&#10;Пармезан — 20 г"></textarea>
       </div>
       <div class="field">
-        <label>Общий выход готового блюда, г</label>
-        <input id="ttk-yield" type="number" placeholder="250">
+        <label>Выход готового блюда, г</label>
+        <input id="ttk-yield" type="number" inputmode="numeric" placeholder="250">
       </div>
       <div class="field">
-        <label>Краткое описание технологического процесса</label>
-        <textarea id="ttk-process" placeholder="Отварить пасту al dente, обжарить бекон, смешать с яйцом и сыром..."></textarea>
+        <label>Технологический процесс</label>
+        <textarea id="ttk-process" placeholder="Отварить пасту al dente, обжарить бекон, смешать с желтком и пармезаном..."></textarea>
       </div>
     </div>
   `;
-  setupMainButton('Собрать ТТК', () => {
+
+  setupMainButton('СОБРАТЬ ТТК', () => {
     const payload = {
       scenario: 'ttk',
       data: {
@@ -108,9 +155,10 @@ function renderTTK() {
         ingredients: document.getElementById('ttk-ingredients').value,
         yield: document.getElementById('ttk-yield').value,
         process: document.getElementById('ttk-process').value,
-      }
+      },
     };
     if (!payload.data.name || !payload.data.ingredients) {
+      haptic.err();
       tg?.showAlert('Заполни как минимум название и ингредиенты');
       return;
     }
@@ -118,26 +166,30 @@ function renderTTK() {
   });
 }
 
-function renderSimple(title, desc, scenarioId) {
+function renderSimple(title, iconSvg, desc, scenarioId) {
   return () => {
+    setupBackButton(renderHome);
     app.innerHTML = `
       <div class="screen">
         <button class="back" onclick="renderHome()">← Назад</button>
+        <div style="width:48px;height:48px;border-radius:14px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;margin-bottom:18px;box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--green) 22%, transparent);">${iconSvg.replace('width="20"','width="24"').replace('height="20"','height="24"')}</div>
         <h2>${title}</h2>
         <div class="desc">${desc}</div>
       </div>
     `;
-    setupMainButton('Открыть в чате', () => send({ scenario: scenarioId, data: {} }));
+    setupMainButton('ОТКРЫТЬ В ЧАТЕ', () => send({ scenario: scenarioId, data: {} }));
   };
 }
 
-function renderStub(title, desc) {
+function renderStub(title, iconSvg, desc) {
   return () => {
+    setupBackButton(renderHome);
     app.innerHTML = `
       <div class="screen">
         <button class="back" onclick="renderHome()">← Назад</button>
+        <div style="width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,0.04);color:var(--muted);display:grid;place-items:center;margin-bottom:18px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06);">${iconSvg.replace('width="20"','width="24"').replace('height="20"','height="24"')}</div>
         <h2>${title}</h2>
-        <div class="desc">${desc}. Скоро появится — сейчас можно воспользоваться «Свободным диалогом».</div>
+        <div class="desc">${desc} в разработке. Пока доступны другие инструменты или свободный диалог.</div>
       </div>
     `;
     hideMainButton();
@@ -146,12 +198,13 @@ function renderStub(title, desc) {
 
 function setupMainButton(text, onClick) {
   if (!tg) return;
-  tg.MainButton.setText(text);
+  tg.MainButton.setParams({ text, color: '#1ed760', text_color: '#0a0e12' });
   tg.MainButton.show();
   tg.MainButton.offClick();
-  tg.MainButton.onClick(onClick);
+  tg.MainButton.onClick(() => { haptic.medium(); onClick(); });
 }
-function hideMainButton() { tg?.MainButton.hide(); }
+
+function hideMainButton() { tg?.MainButton?.hide?.(); }
 
 window.renderHome = renderHome;
 renderHome();
