@@ -7,6 +7,23 @@ if (tg) {
   try { tg.setHeaderColor('#121418'); tg.setBackgroundColor('#121418'); } catch {}
 }
 
+document.addEventListener('gesturestart',  e => e.preventDefault());
+document.addEventListener('gesturechange', e => e.preventDefault());
+document.addEventListener('gestureend',    e => e.preventDefault());
+
+let _lastTouchEnd = 0;
+document.addEventListener('touchend', (e) => {
+  const now = Date.now();
+  if (now - _lastTouchEnd <= 350) e.preventDefault();
+  _lastTouchEnd = now;
+}, { passive: false });
+
+document.addEventListener('touchmove', (e) => {
+  if (e.touches.length > 1) e.preventDefault();
+}, { passive: false });
+
+document.addEventListener('dblclick', e => e.preventDefault());
+
 const haptic = {
   tap:    () => tg?.HapticFeedback?.impactOccurred?.('light'),
   medium: () => tg?.HapticFeedback?.impactOccurred?.('medium'),
