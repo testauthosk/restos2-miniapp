@@ -18,6 +18,43 @@ const haptic = {
 
 const app = document.getElementById('app');
 
+let isTransitioning = false;
+function transitionTo(direction, render) {
+  if (isTransitioning) return;
+  isTransitioning = true;
+
+  const supportsVT = typeof document.startViewTransition === 'function';
+  if (supportsVT) {
+    document.startViewTransition(() => {
+      render();
+    }).finished.finally(() => { isTransitioning = false; });
+    return;
+  }
+
+  const leaveClass = direction === 'back' ? 'is-leaving-back' : 'is-leaving-forward';
+  const enterClass = direction === 'back' ? 'is-entering-back' : 'is-entering-forward';
+
+  app.classList.remove('is-entering-forward', 'is-entering-back');
+  app.classList.add(leaveClass);
+
+  const onLeaveDone = () => {
+    app.removeEventListener('transitionend', onLeaveDone);
+    app.classList.remove(leaveClass);
+    render();
+    app.scrollTop = 0;
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    app.classList.add(enterClass);
+    const onEnterDone = () => {
+      app.removeEventListener('animationend', onEnterDone);
+      app.classList.remove(enterClass);
+      isTransitioning = false;
+    };
+    app.addEventListener('animationend', onEnterDone);
+  };
+  app.addEventListener('transitionend', onLeaveDone);
+  setTimeout(() => { if (app.classList.contains(leaveClass)) onLeaveDone(); }, 260);
+}
+
 const icons = {
   chef: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><path d="M6 17h12"/></svg>`,
   file:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5M8 9h2"/></svg>`,
@@ -117,14 +154,19 @@ function openScenario(id) {
     abc: renderStub('ABC-анализ Excel', icons.chart, 'Модуль аналитики продаж'),
     chat: renderSimple('Свободный диалог', icons.chat, 'Открою чат в боте — задавай любой вопрос по кухне, технологии, управлению.', 'chat'),
   };
-  (routes[id] || renderHome)();
+  const fn = routes[id] || renderHome;
+  transitionTo('forward', fn);
+}
+
+function backToHome() {
+  transitionTo('back', renderHome);
 }
 
 function renderTTK() {
-  setupBackButton(renderHome);
+  setupBackButton(backToHome);
   app.innerHTML = `
     <div class="screen">
-      <button class="back" onclick="renderHome()">← Назад</button>
+      <button class="back" onclick="backToHome()">← Назад</button>
       <h2>Составить ТТК</h2>
       <div class="desc">Технико-технологическая карта. Заполни поля — бот соберёт документ по стандарту.</div>
 
@@ -168,10 +210,10 @@ function renderTTK() {
 
 function renderSimple(title, iconSvg, desc, scenarioId) {
   return () => {
-    setupBackButton(renderHome);
+    setupBackButton(backToHome);
     app.innerHTML = `
       <div class="screen">
-        <button class="back" onclick="renderHome()">← Назад</button>
+        <button class="back" onclick="backToHome()">← Назад</button>
         <div style="width:48px;height:48px;border-radius:14px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;margin-bottom:18px;box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--green) 22%, transparent);">${iconSvg.replace('width="20"','width="24"').replace('height="20"','height="24"')}</div>
         <h2>${title}</h2>
         <div class="desc">${desc}</div>
@@ -183,10 +225,10 @@ function renderSimple(title, iconSvg, desc, scenarioId) {
 
 function renderStub(title, iconSvg, desc) {
   return () => {
-    setupBackButton(renderHome);
+    setupBackButton(backToHome);
     app.innerHTML = `
       <div class="screen">
-        <button class="back" onclick="renderHome()">← Назад</button>
+        <button class="back" onclick="backToHome()">← Назад</button>
         <div style="width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,0.04);color:var(--muted);display:grid;place-items:center;margin-bottom:18px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06);">${iconSvg.replace('width="20"','width="24"').replace('height="20"','height="24"')}</div>
         <h2>${title}</h2>
         <div class="desc">${desc} в разработке. Пока доступны другие инструменты или свободный диалог.</div>
@@ -207,4 +249,5 @@ function setupMainButton(text, onClick) {
 function hideMainButton() { tg?.MainButton?.hide?.(); }
 
 window.renderHome = renderHome;
+window.backToHome = backToHome;
 renderHome();
