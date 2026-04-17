@@ -33,10 +33,10 @@ function renderHome() {
     </div>
 
     <div class="plan-card">
-      <div class="label">Демо-тариф</div>
-      <div class="value">0 ₽</div>
+      <div class="label">Демо-тариф · 0 ₽</div>
+      <div class="value">0 из 10 запросов</div>
       <div class="progress"><div style="width:0%"></div></div>
-      <div class="meta">0 из 10 запросов в месяц</div>
+      <div class="meta">Лимит сбросится в начале следующего месяца</div>
     </div>
 
     <div class="section-title">Меню</div>
@@ -45,10 +45,10 @@ function renderHome() {
     <div class="section-title">Свободный диалог</div>
     <div class="card wide chat" data-id="chat">
       <div class="icon">💬</div>
-      <div class="title">Задать свой вопрос<br><span style="font-weight:400;font-size:12px;opacity:.8">любая задача по кухне</span></div>
+      <div class="title">Задать свой вопрос<span>любая задача по кухне</span></div>
     </div>
 
-    <div class="support">🎧 Техническая поддержка — @restos_support</div>
+    <div class="support">Техническая поддержка — @restos_support</div>
   `;
   const grid = document.getElementById('menu-grid');
   SCENARIOS.forEach(s => {
@@ -78,8 +78,8 @@ function openScenario(id) {
 function renderTTK() {
   app.innerHTML = `
     <div class="screen">
-      <div class="back" onclick="renderHome()">← Назад</div>
-      <h2>📝 Составить ТТК</h2>
+      <button class="back" onclick="renderHome()">← Назад</button>
+      <h2>Составить ТТК</h2>
       <div class="desc">Технико-технологическая карта блюда. Заполни, отправлю в бота — он выдаст готовый документ.</div>
 
       <div class="field">
@@ -122,7 +122,7 @@ function renderSimple(title, desc, scenarioId) {
   return () => {
     app.innerHTML = `
       <div class="screen">
-        <div class="back" onclick="renderHome()">← Назад</div>
+        <button class="back" onclick="renderHome()">← Назад</button>
         <h2>${title}</h2>
         <div class="desc">${desc}</div>
       </div>
@@ -135,7 +135,7 @@ function renderStub(title, desc) {
   return () => {
     app.innerHTML = `
       <div class="screen">
-        <div class="back" onclick="renderHome()">← Назад</div>
+        <button class="back" onclick="renderHome()">← Назад</button>
         <h2>${title}</h2>
         <div class="desc">${desc}. Скоро появится — сейчас можно воспользоваться «Свободным диалогом».</div>
       </div>
